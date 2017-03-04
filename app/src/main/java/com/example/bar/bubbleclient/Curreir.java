@@ -101,7 +101,7 @@ public class Curreir extends AppCompatActivity {
                 rg.removeAllViews();
                 for (int i = 0; i < size; i++) {
 
-                    if(results.get(i).SSID.endsWith("e")) {
+                    if(results.get(i).SSID.endsWith(".bubbles.one")) {
                         String ssidSTR = results.get(i).SSID;
                         Log.v("SSID:", ssidSTR);
                         dets = ssidSTR.split("\\.");
@@ -109,6 +109,11 @@ public class Curreir extends AppCompatActivity {
                         Log.v("token:", dets[0]);
                         if(map.containsKey(dets[1])) continue;
                         map.put(dets[1], dets[0]);
+
+                        //dets = new String[]{"123", "bar"};
+
+
+
 
                         int time = (int) (System.currentTimeMillis());
                         Timestamp tsTemp = new Timestamp(time);
