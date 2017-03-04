@@ -45,71 +45,89 @@ public class messagePopUp extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.message_pop_up);
         Button sendButton = (Button) findViewById(R.id.submitMessage);
-        top = (RelativeLayout) findViewById(R.id.massageWrapper);
+        //top = (RelativeLayout) findViewById(R.id.massageWrapper);
+        UserName = getIntent().getStringExtra("userName");
+        Token = getIntent().getStringExtra("token");
         sendButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 SendMessage();
+
             }
         });
     }
     public void SendMessage(){
-        EditText message = (EditText) findViewById(R.id.messageText);
-        String message_str = message.toString();
+        EditText messageBox = (EditText) findViewById(R.id.messageText);
+        message = String.valueOf(messageBox.getText());
         //TODO - get username & current token
 
 
-        publish(UserName, Token, message_str);
+        publish(UserName, Token, message);
+        Intent intent=new Intent();
+        intent.putExtra("RESULT_STRING", response);
+        setResult(RESULT_OK, intent);
+        try {
+            wait(1000);
+        } catch (Exception e) {
+            Log.d("Error", e.toString());
+        }
+        finish();
 
 
     }
     public String publish(String UserName, final String Token, String message){
         url_str = getString(R.string.ip) + ":" + getString(R.string.port);
 
-        Thread thread = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    String UserName = "alon";
-                    String Token = "604722";
-                    String message = "try100000yuvalles";
-                    URL url = new URL(url_str + "/publish/" + UserName + "/" + Token + "/" + message);
-                    //URL url = new URL(url_str + "/read_all");
-                    urlConnection = (HttpURLConnection) url.openConnection();
-                    try {
-                        Log.v("urlConnection is: ", urlConnection.toString());
-                        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()));
-                        StringBuilder stringBuilder = new StringBuilder();
-                        String line;
-                        while ((line = bufferedReader.readLine()) != null) {
-                            stringBuilder.append(line).append("\n");
-                        }
-                        bufferedReader.close();
-                        response = stringBuilder.toString();
-                        Log.v("urlThread:", "response text is: " + response);
-                        Toast.makeText(getApplicationContext(), "response: " + response, Toast.LENGTH_LONG).show();
-                        //c.unregisterReceiver(reciever);
-                    }
-                    finally{
-                        urlConnection.disconnect();
-                    }
-                }
-                catch(Exception e) {
-                    Log.e("ERROR", e.getMessage(), e);
-                }
-            }
-        });
+        resThread thread = new resThread();
         thread.start();
-/*
-        try {
+
+        /*try {
             thread.join();
             Log.v("thread joiner", "thread joined");
         }
         catch(Exception e) {
             Log.e("ERROR", e.getMessage(), e);
-        }
-*/
+        }*/
         return "this should work";
     }
 
+    private class resThread extends Thread{
+        public resThread(){
+            super(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+
+                        URL url = new URL(url_str + "/publish/" + UserName + "/" + Token + "/" + message);
+                        Log.v("The url is", url.toString());
+                        //URL url = new URL(url_str + "/read_all");
+                        urlConnection = (HttpURLConnection) url.openConnection();
+                        try {
+                            Log.v("urlConnection is: ", urlConnection.toString());
+                            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()));
+                            StringBuilder stringBuilder = new StringBuilder();
+                            String line;
+                            while ((line = bufferedReader.readLine()) != null) {
+                                stringBuilder.append(line).append("\n");
+                            }
+                            bufferedReader.close();
+                            response = stringBuilder.toString();
+                            Log.v("urlThread:", "response text is: " + response);
+                            //Toast.makeText(getApplicationContext(), "response: " + response, Toast.LENGTH_LONG).show();
+                            //c.unregisterReceiver(reciever);
+                        }
+                        catch (Exception e){
+                            Log.v("in the catch", "response text is: " + response);
+                        }
+                        finally{
+                            urlConnection.disconnect();
+                        }
+                    }
+                    catch(Exception e) {
+                        Log.e("ERROR", e.getMessage(), e);
+                    }
+                }
+            });
+        }
+    }
 }

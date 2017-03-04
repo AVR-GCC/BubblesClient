@@ -68,6 +68,11 @@ public class Curreir extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_curreir);
 
+
+    }
+    @Override
+    protected void onStart(){
+        super.onStart();
         // Start Wifi
         wifi = (WifiManager) getSystemService(Context.WIFI_SERVICE);
         if (wifi.isWifiEnabled() == false) {
@@ -120,7 +125,7 @@ public class Curreir extends AppCompatActivity {
                         String ts =  tsTemp.toString();
                         curButton = new RadioButton(self);
                         curButton.setText(dets[1]);
-                        curButton.setTextSize(20);
+                        curButton.setTextSize(40);
                         curButton.setOnClickListener(new View.OnClickListener() {
                                                          @Override
                                                          public void onClick(View v) {
@@ -174,10 +179,13 @@ public class Curreir extends AppCompatActivity {
     }
 
     @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data)
-    {
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
         String string = data.getStringExtra("RESULT_STRING");
-        Toast.makeText(getApplicationContext(), "response: " + string, Toast.LENGTH_LONG).show();
+
+
+        rg.clearCheck();
+
+        Toast.makeText(getApplicationContext(), "message sent", Toast.LENGTH_LONG).show();
     }
     public String publish(String UserName, String Token, String message){
         return "all is well";
