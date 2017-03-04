@@ -35,9 +35,11 @@ import android.widget.SimpleAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class Curreir extends AppCompatActivity {
     private static final String TAG = "BubbleClient";
@@ -47,7 +49,9 @@ public class Curreir extends AppCompatActivity {
     private static RadioGroup rg;
     private static RadioButton curButton;
     private static BroadcastReceiver reciever;
-
+    private static String Token;
+    private static String UserName;
+    private static String[] dets;
 
     WifiManager wifi;
     ListView lv;
@@ -89,14 +93,28 @@ public class Curreir extends AppCompatActivity {
                     results = wifi.getScanResults();
                     //do something, permission was previously granted; or legacy device
                 }
+                Map<String, String> map = new HashMap<String, String>();
                 results = wifi.getScanResults();
+                Toast.makeText(self, "Scanning...", Toast.LENGTH_SHORT).show();
                 size = results.size();
                 rg = (RadioGroup) findViewById(R.id.RBWrapper);
                 rg.removeAllViews();
                 for (int i = 0; i < size; i++) {
-                    if(results.get(i).SSID.endsWith(".bubbles.one")) {
+
+                    if(results.get(i).SSID.endsWith("e")) {
+                        String ssidSTR = results.get(i).SSID;
+                        Log.v("SSID:", ssidSTR);
+                        dets = ssidSTR.split("\\.");
+                        Log.v("username:", dets[1]);
+                        Log.v("token:", dets[0]);
+                        if(map.containsKey(dets[1])) continue;
+                        map.put(dets[1], dets[0]);
+
+                        int time = (int) (System.currentTimeMillis());
+                        Timestamp tsTemp = new Timestamp(time);
+                        String ts =  tsTemp.toString();
                         curButton = new RadioButton(self);
-                        curButton.setText(results.get(i).SSID);
+                        curButton.setText(dets[1]);
                         curButton.setTextSize(20);
                         curButton.setOnClickListener(new View.OnClickListener() {
                                                          @Override
@@ -104,13 +122,16 @@ public class Curreir extends AppCompatActivity {
                                                              self.unregisterReceiver(reciever);
                                                              Toast.makeText(self, curButton.getText(), Toast.LENGTH_SHORT).show();
                                                              Intent messageBubble = new Intent(Curreir.this, messagePopUp.class);
-                                                             messageBubble.putExtra("token",(String) curButton.getText().subSequence(0, 6));
-                                                             startActivity(messageBubble);
+                                                             messageBubble.putExtra("token", dets[0]);
+                                                             messageBubble.putExtra("userName", dets[1]);
+                                                             startActivityForResult(messageBubble, 0);
 
                                                          }
                                                      }
                         );
+                        Log.v("radio button", "adding and breaking");
                         rg.addView(curButton);
+
                     }
                 }
 
@@ -147,6 +168,12 @@ public class Curreir extends AppCompatActivity {
         } catch (Exception e) {}
     }
 
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data)
+    {
+        String string = data.getStringExtra("RESULT_STRING");
+        Toast.makeText(getApplicationContext(), "response: " + string, Toast.LENGTH_LONG).show();
+    }
     public String publish(String UserName, String Token, String message){
         return "all is well";
     }
@@ -167,6 +194,7 @@ public class Curreir extends AppCompatActivity {
     public void StartPopUp(){
 
     }
+
 }
         //android.support.design.widget.CollapsingToolbarLayout toolbar2 = (CollapsingToolbarLayout) findViewById(R.id.toolbar_layout);
         //setSupportActionBar(toolbar);
