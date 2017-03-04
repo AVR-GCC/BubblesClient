@@ -46,6 +46,7 @@ public class Curreir extends AppCompatActivity {
     private static List<android.net.wifi.ScanResult> netlist;
     private static RadioGroup rg;
     private static RadioButton curButton;
+    private static BroadcastReceiver reciever;
 
 
     WifiManager wifi;
@@ -62,25 +63,28 @@ public class Curreir extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_curreir);
+
+        // Start Wifi
         wifi = (WifiManager) getSystemService(Context.WIFI_SERVICE);
         if (wifi.isWifiEnabled() == false) {
             Toast.makeText(getApplicationContext(), "wifi is disabled..making it enabled", Toast.LENGTH_LONG).show();
             wifi.setWifiEnabled(true);
         }
-
-        WifiInfo wfi = wifi.getConnectionInfo();
-        results = wifi.getScanResults();
+        //results = wifi.getScanResults();
 
 
-        registerReceiver(new BroadcastReceiver() {
+
+
+
+
+        //When Scan is done
+        reciever = new BroadcastReceiver() {
             @Override
             public void onReceive(Context c, Intent intent) {
-                //-TODO - request permissions online:
-
+                //-TODO - request THE CORRECT permissions online:
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                    requestPermissions(new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, 0);
+                    requestPermissions(new String[]{Manifest.permission.ACCESS_COARSE_LOCATION},2);
                     //After this point you wait for callback in onRequestPermissionsResult(int, String[], int[]) overriden method
-
                 } else {
                     results = wifi.getScanResults();
                     //do something, permission was previously granted; or legacy device
@@ -95,15 +99,16 @@ public class Curreir extends AppCompatActivity {
                         curButton.setText(results.get(i).SSID);
                         curButton.setTextSize(20);
                         curButton.setOnClickListener(new View.OnClickListener() {
-                                                  @Override
-                                                  public void onClick(View v) {
-                                                      Toast.makeText(self, curButton.getText(), Toast.LENGTH_SHORT).show();
-                                                      Intent messageBubble = new Intent(Curreir.this, messagePopUp.class);
-                                                      messageBubble.putExtra("token",(String) curButton.getText().subSequence(0, 6));
-                                                      startActivity(messageBubble);
+                                                         @Override
+                                                         public void onClick(View v) {
+                                                             self.unregisterReceiver(reciever);
+                                                             Toast.makeText(self, curButton.getText(), Toast.LENGTH_SHORT).show();
+                                                             Intent messageBubble = new Intent(Curreir.this, messagePopUp.class);
+                                                             messageBubble.putExtra("token",(String) curButton.getText().subSequence(0, 6));
+                                                             startActivity(messageBubble);
 
-                                                  }
-                                              }
+                                                         }
+                                                     }
                         );
                         rg.addView(curButton);
                     }
@@ -112,13 +117,14 @@ public class Curreir extends AppCompatActivity {
 
                 rg.invalidate();
             }
-        }, new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
+        };
+        registerReceiver(reciever, new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
         self = this;
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
 
         //RadioGroup rg = (RadioGroup) findViewById(R.id.RBWrapper);
-
+        //WifiInfo wfi = wifi.getConnectionInfo();
 
         arraylist.clear();
 
@@ -144,9 +150,11 @@ public class Curreir extends AppCompatActivity {
     public String publish(String UserName, String Token, String message){
         return "all is well";
     }
+
     public String read(String UserName, String Password){
         return "all is well";
     }
+
     private void autoScanner() {
         try{
             while(wifi != null){

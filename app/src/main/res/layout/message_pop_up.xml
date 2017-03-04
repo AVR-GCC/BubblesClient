@@ -13,8 +13,6 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="5dp"
         android:layout_centerHorizontal="true"
-
-        android:onClick="SendMessage"
         android:layout_below="@+id/messageText"
         android:text="Send"/>
 </RelativeLayout>
